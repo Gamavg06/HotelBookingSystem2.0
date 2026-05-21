@@ -72,12 +72,24 @@ function defaultUsers() {
   ];
 }
 function saveDB() {
-  const { currentUser, pending, ...data } = db;
-  localStorage.setItem(DB_KEY, JSON.stringify({ ...data, currentUser:null, pending:null }));
-  if (currentUser || pending) sessionStorage.setItem(SESSION_KEY, JSON.stringify({ currentUser, pending }));
-  else sessionStorage.removeItem(SESSION_KEY);
-}
+  localStorage.setItem(DB_KEY, JSON.stringify({
+    users: db.users,
+    rooms: db.rooms,
+    bookings: db.bookings,
+    config: db.config,
+    currentUser: null,
+    pending: null
+  }));
 
+  if (db.currentUser || db.pending) {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+      currentUser: db.currentUser,
+      pending: db.pending
+    }));
+  } else {
+    sessionStorage.removeItem(SESSION_KEY);
+  }
+}
 function syncCurrentUser() {
   if (!db.currentUser) return;
   const fresh = db.users.find(u => u.id === db.currentUser.id);
@@ -677,7 +689,7 @@ function renderAdminUsers() {
     if (!tableBody) return;
 
     tableBody.innerHTML = '';
-    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    const loggedInUser = db.currentUser;
 
     // Usamos la lista completa de usuarios sin filtrar al admin activo
     const usersToRender = db.users;
