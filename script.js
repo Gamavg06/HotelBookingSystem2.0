@@ -64,6 +64,7 @@ function syncCurrentUser() {
 
 function refreshCurrentPage() {
   updateNav();
+  updateUserPageHeader();
   const r = { home:renderHome, rooms:renderRooms, 'my-bookings':renderMyBookings, booking:renderBookingPage, payment:renderPaymentPage, 'admin-panel':renderAdminPanel, 'admin-rooms':renderAdminRooms, 'admin-bookings':renderAdminBookings, 'admin-users':renderAdminUsers, 'admin-settings':renderSettings };
   if (r[currentPage]) r[currentPage]();
 }
@@ -81,6 +82,19 @@ function setErr(id,msg) { const el=$(id); if(!el) return; el.textContent=msg||''
 function setVal(id,val) { const el=$(id); if(el) el.value=val||''; }
 function getVal(id) { const el=$(id); return el?el.value.trim():''; }
 function findUserByEmail(email) { return db.users.find(u=>u.email.toLowerCase()===String(email||'').toLowerCase()); }
+function updateUserPageHeader() {
+  const nameEl = $('page-header-user-name');
+  const roleEl = $('page-header-user-role');
+  if (!nameEl || !roleEl) return;
+  const u = db.currentUser;
+  if (u) {
+    nameEl.textContent = `${u.name} ${u.lastName}`;
+    roleEl.textContent = u.role === 'Admin' ? 'Administrator' : 'Guest';
+  } else {
+    nameEl.textContent = '';
+    roleEl.textContent = '';
+  }
+}
 function todayISO() {
   const now = new Date();
   const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
@@ -643,7 +657,7 @@ function renderAdminUsers() {
     tableBody.innerHTML = '';
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
-    // CORRECCIÓN: Usamos la lista completa de usuarios sin filtrar al admin activo
+    // Usamos la lista completa de usuarios sin filtrar al admin activo
     const usersToRender = db.users;
 
     usersToRender.forEach(user => {
@@ -678,6 +692,57 @@ function renderAdminUsers() {
     });
 }
 
+// Buscar usuarios en el panel de admin
+const adminSearchInput = document.getElementById('adminSearchInput');
+
+if (adminSearchInput) {
+    adminSearchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+        const filteredUsers = db.users.filter(user =>
+            user.name.toLowerCase().includes(searchTerm) ||
+            user.email.toLowerCase().includes(searchTerm) ||
+            user.role.toLowerCase().includes(searchTerm)
+        );
+
+        const tableBody = document.getElementById('adminUsersTableBody');
+
+        if (tableBody) {
+            tableBody.innerHTML = '';
+
+            filteredUsers.forEach(user => {
+                const tr = document.createElement('tr');
+                const isSelf = loggedInUser && user.email === loggedInUser.email;
+
+                tr.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.name} ${isSelf ? '<span style="color: #007bff; font-weight: bold;">(Tú)</span>' : ''}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        <span class="status-badge ${user.active ? 'status-active' : 'status-inactive'}">
+                            ${user.active ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="openEditUserModal(${user.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action btn-toggle" onclick="toggleUserStatus(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                            <i class="fas ${user.active ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                        </button>
+                        <button class="btn-action btn-delete" onclick="deleteUser(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+
+                tableBody.appendChild(tr);
+            });
+        }
+    });
+}
 // ── SETTINGS ──────────────────────────────────────────────────
 function renderSettings() { loadSettingsValues(); openSettingsTab('general'); }
 
