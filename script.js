@@ -637,28 +637,45 @@ function saveBooking() {
 
 // ── ADMIN USERS ───────────────────────────────────────────────
 function renderAdminUsers() {
-  const tbody = $('admin-users-tbody');
-  if (!tbody) return;
-  tbody.innerHTML = db.users.map(u => `
-    <tr>
-      <td>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div class="nav-user-avatar" style="width:32px;height:32px;font-size:.8rem;">${initials(u.name+' '+u.lastName)}</div>
-          <div><strong>${u.name} ${u.lastName}</strong></div>
-        </div>
-      </td>
-      <td>${u.email}</td>
-      <td>${u.phone||'—'}</td>
-      <td>${u.nationality||'—'}</td>
-      <td><span class="badge ${u.role==='Admin'?'badge-admin':'badge-user'}">${u.role}</span></td>
-      <td>
-        <button class="btn btn-danger btn-sm"
-          onclick="openDeleteModal('user',${u.id})"
-          ${u.id===db.currentUser?.id?'disabled style="opacity:.35;cursor:not-allowed"':''}>
-          Delete
-        </button>
-      </td>
-    </tr>`).join('');
+    const tableBody = document.getElementById('adminUsersTableBody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '';
+    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+    // CORRECCIÓN: Usamos la lista completa de usuarios sin filtrar al admin activo
+    const usersToRender = db.users;
+
+    usersToRender.forEach(user => {
+        const tr = document.createElement('tr');
+        
+        // Verificamos si la fila actual es la del administrador logueado
+        const isSelf = loggedInUser && user.email === loggedInUser.email;
+
+        tr.innerHTML = `
+            <td>${user.id}</td>
+            <td>${user.name} ${isSelf ? '<span style="color: #007bff; font-weight: bold;">(Tú)</span>' : ''}</td>
+            <td>${user.email}</td>
+            <td>${user.role}</td>
+            <td>
+                <span class="status-badge ${user.active ? 'status-active' : 'status-inactive'}">
+                    ${user.active ? 'Activo' : 'Inactivo'}
+                </span>
+            </td>
+            <td>
+                <button class="btn-action btn-edit" onclick="openEditUserModal(${user.id})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-action btn-toggle" onclick="toggleUserStatus(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;" title="No puedes inactivar tu propia cuenta"' : ''}>
+                    <i class="fas ${user.active ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                </button>
+                <button class="btn-action btn-delete" onclick="deleteUser(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;" title="No puedes eliminar tu propia cuenta"' : ''}>
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(tr);
+    });
 }
 
 // ── SETTINGS ──────────────────────────────────────────────────
