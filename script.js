@@ -43,10 +43,32 @@ function loadDB() {
   saveDB();
 }                          // ← llave de cierre de loadDB()
 
-function defaultUsers() { // ← función SEPARADA, fuera de loadDB()
+function defaultUsers() {
   return [
-    { id:1, name:'Admin', lastName:'System', age:30, phone:'5550001', nationality:'MX', email:'admin@hotel.com', password:'admin123', role:'Admin' },
-    { id:2, name:'John',  lastName:'Smith',  age:28, phone:'5551234', nationality:'MX', email:'john@test.com',  password:'123456',  role:'User'  }
+    {
+      id:1,
+      name:'Admin',
+      lastName:'System',
+      age:30,
+      phone:'5550001',
+      nationality:'MX',
+      email:'admin@hotel.com',
+      password:'admin123',
+      role:'Admin',
+      active:true
+    },
+    {
+      id:2,
+      name:'John',
+      lastName:'Smith',
+      age:28,
+      phone:'5551234',
+      nationality:'MX',
+      email:'john@test.com',
+      password:'123456',
+      role:'User',
+      active:true
+    }
   ];
 }
 function saveDB() {

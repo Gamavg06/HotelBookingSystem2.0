@@ -842,6 +842,23 @@ tr:hover td { background: #faf8f3; }
 .page-header-actions { display: flex; gap: 10px; }
 
 /* ════════════════════════════════════════════════════════
+   USER PAGE HEADER (logout en páginas de usuario)
+════════════════════════════════════════════════════════ */
+.page-header-user {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; margin-bottom: 8px;
+}
+.page-header-user-info { display: flex; flex-direction: column; gap: 1px; }
+.page-header-user-name {
+  font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 600;
+  color: var(--ink-800); letter-spacing: 0.01em;
+}
+.page-header-user-role {
+  font-size: 0.76rem; color: var(--stone-500);
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+
+/* ════════════════════════════════════════════════════════
    FOOTER
 ════════════════════════════════════════════════════════ */
 footer {
