@@ -42,35 +42,63 @@ function loadDB() {
   ];
   saveDB();
 }                          // ← llave de cierre de loadDB()
-
+// ── DB CONFIG & DEFAULTS ──────────────────────────────────────
 function defaultUsers() {
   return [
     {
-      id:1,
-      name:'Admin',
-      lastName:'System',
-      age:30,
-      phone:'5550001',
-      nationality:'MX',
-      email:'admin@hotel.com',
-      password:'admin123',
-      role:'Admin',
-      active:true
+      id: 1,
+      name: 'Admin',
+      lastName: 'System',
+      age: 30,
+      phone: '5550001',
+      nationality: 'MX',
+      email: 'admin@hotel.com',
+      password: 'admin123',
+      role: 'Admin',
+      active: true
     },
     {
-      id:2,
-      name:'John',
-      lastName:'Smith',
-      age:28,
-      phone:'5551234',
-      nationality:'MX',
-      email:'john@test.com',
-      password:'123456',
-      role:'User',
-      active:true
+      id: 2,
+      name: 'John',
+      lastName: 'Smith',
+      age: 28,
+      phone: '5551234',
+      nationality: 'MX',
+      email: 'john@test.com',
+      password: '123456',
+      role: 'User',
+      active: true
     }
   ];
 }
+
+function loadDB() {
+  const s = localStorage.getItem(DB_KEY);
+  if (s) {
+    const stored  = JSON.parse(s);
+    const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
+    db = { 
+      ...db, 
+      ...stored, 
+      currentUser: session.currentUser || stored.currentUser || null, 
+      pending: session.pending || stored.pending || null 
+    };
+    
+    // Si por alguna razón la lista de usuarios se quedó vacía en el storage, inyectamos los defaults
+    if (!db.users || db.users.length === 0) {
+      db.users = defaultUsers();
+      saveDB();
+    }
+  } else {
+    // PRIMERA VEZ EN LA APP: Poblamos la base de datos con los usuarios por defecto
+    db.users = defaultUsers();
+    db.rooms = db.rooms || [];
+    db.bookings = db.bookings || [];
+    saveDB();
+  }
+  syncCurrentUser();
+}
+
 function saveDB() {
   localStorage.setItem(DB_KEY, JSON.stringify({
     users: db.users,
@@ -90,6 +118,7 @@ function saveDB() {
     sessionStorage.removeItem(SESSION_KEY);
   }
 }
+
 function syncCurrentUser() {
   if (!db.currentUser) return;
   const fresh = db.users.find(u => u.id === db.currentUser.id);
@@ -570,7 +599,8 @@ function renderAdminRooms() {
     <tr>
       <td><img class="thumb" src="${IMG(r.img)}" alt="${r.name}" onerror="this.style.background='#e8e0d0'"/></td>
       <td><strong>${r.name}</strong></td>
-      <td style="max-width:200px;color:var(--stone-500);font-size:.82rem;">${r.desc.slice(0,70)}…</td>
+      // Línea 965 protegida en tu script.js:
+<td style="max-width:200px;color:var(--stone-500);font-size:.82rem;">${(r.desc || '').slice(0,70)}…</td>
       <td>${fmtMoney(r.price)}</td>
       <td>${roomStatusBadge(r.id)}</td>
       <td>${(r.amenities||[]).slice(0,2).map(a=>`<span class="badge badge-user">${a}</span>`).join(' ')}</td>
