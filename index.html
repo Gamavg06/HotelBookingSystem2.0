@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Hotel Booking</title>
+  <!-- EmailJS CDN - required for email notifications -->
+  <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script> -->
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════════════════════════ -->
+<nav id="main-nav" class="hidden">
+  <div class="nav-inner">
+    <a class="nav-brand" onclick="navigate('home')">
+      <div class="nav-logo-wrap">
+        <img class="nav-logo-img" src="" alt="Logo"/>
+      </div>
+      <div class="nav-brand-text">
+        <span class="nav-brand-name">Hotel Booking</span>
+        <span class="nav-brand-sub">Luxury &amp; Comfort</span>
+      </div>
+    </a>
+    <div class="nav-center" id="nav-links"></div>
+    <div class="nav-right" id="nav-right"></div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════
+     LOGIN
+═══════════════════════════════════════════════════════════ -->
+<div class="page page-dark" id="page-login">
+  <div class="auth-split">
+    <div class="auth-left">
+      <div class="auth-left-pattern"></div>
+      <div class="auth-left-logo">
+        <div class="auth-left-logo-box"><img id="auth-logo-login" src="" alt="Logo"/></div>
+        <span class="auth-left-logo-text">Hotel Booking</span>
+      </div>
+      <div class="auth-left-content">
+        <h2>An unforgettable<br><em>experience</em><br>awaits you.</h2>
+        <p>Book your perfect stay in minutes. Luxury rooms, impeccable service and thoughtful care that makes every detail stand out.</p>
+        <img class="auth-left-img" src="wwwroot/images/banner.png" alt="Hotel" onerror="this.style.display='none'"/>
+      </div>
+      <div class="auth-left-footer"><p>&copy; 2026 Hotel Booking. All rights reserved.</p></div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-form-wrap anim-fade-up">
+        <h3>Sign in</h3>
+        <p class="auth-sub">Access your account to manage bookings.</p>
+        <div id="login-err" class="alert alert-error hidden"></div>
+        <div class="form-group">
+          <label class="form-label form-label-dark">Email</label>
+          <input class="form-input form-input-dark" id="login-email" type="email" placeholder="email@hotel.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label-dark">Password</label>
+          <input class="form-input form-input-dark" id="login-pass" type="password" placeholder="••••••••"
+            onkeydown="if(event.key==='Enter') doLogin()"/>
+        </div>
+        <button class="btn-auth mt-20" onclick="doLogin()">Sign in</button>
+        <p class="auth-link" onclick="navigate('register')">Don't have an account? <span>Register for free</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     REGISTER
+═══════════════════════════════════════════════════════════ -->
+<div class="page page-dark" id="page-register">
+  <div class="auth-split">
+    <div class="auth-left">
+      <div class="auth-left-pattern"></div>
+      <div class="auth-left-logo">
+        <div class="auth-left-logo-box"><img id="auth-logo-register" src="" alt="Logo"/></div>
+        <span class="auth-left-logo-text">Hotel Booking</span>
+      </div>
+      <div class="auth-left-content">
+        <h2>Your next<br><em>adventure</em><br>starts here.</h2>
+        <p>Create your account in seconds and access exclusive rooms, preferred rates and instant confirmations by WhatsApp and email.</p>
+        <img class="auth-left-img" src="wwwroot/images/banner.png" alt="Hotel" onerror="this.style.display='none'"/>
+      </div>
+      <div class="auth-left-footer"><p>&copy; 2026 Hotel Booking. All rights reserved.</p></div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-form-wrap anim-fade-up">
+        <h3>Create account</h3>
+        <p class="auth-sub">Complete your details to get started.</p>
+        <div id="reg-err" class="alert alert-error hidden"></div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label form-label-dark">First name *</label>
+            <input class="form-input form-input-dark" id="reg-name" placeholder="John"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label-dark">Last name *</label>
+            <input class="form-input form-input-dark" id="reg-lastname" placeholder="Smith"/>
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label form-label-dark">Age</label>
+            <input class="form-input form-input-dark" id="reg-age" type="number" placeholder="25"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label-dark">Phone</label>
+            <input class="form-input form-input-dark" id="reg-phone" placeholder="+52 555 000 0000"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label-dark">Nationality</label>
+          <input class="form-input form-input-dark" id="reg-nationality" placeholder="Mexican"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label-dark">Email *</label>
+          <input class="form-input form-input-dark" id="reg-email" type="email" placeholder="email@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label-dark">Password *</label>
+          <input class="form-input form-input-dark" id="reg-pass" type="password" placeholder="Minimum 6 characters"/>
+        </div>
+        <button class="btn-auth mt-12" onclick="doRegister()">Create my account</button>
+        <p class="auth-link" onclick="navigate('login')">Already have an account? <span>Sign in</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     HOME
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-home">
+  <div class="container">
+    <div class="hero anim-fade-up">
+      <div class="hero-media">
+        <img id="hero-banner" src="" alt="Hotel Banner" onerror="this.parentElement.style.background='var(--ink-800)'"/>
+      </div>
+      <div class="hero-gradient"></div>
+      <div class="hero-gradient-bottom"></div>
+      <div class="hero-body">
+        <div class="hero-tag">Online booking available</div>
+        <h1>A perfect<br><em>stay</em><br>awaits you.</h1>
+        <p>Rooms designed for discerning travelers. From presidential suites to modern studios.</p>
+        <div class="hero-actions" id="hero-actions"></div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat-card">
+          <div class="hero-stat-num" id="hero-stat-rooms">4</div>
+          <div class="hero-stat-label">Rooms</div>
+        </div>
+        <div class="hero-stat-card">
+          <div class="hero-stat-num" id="hero-stat-bookings">50+</div>
+          <div class="hero-stat-label">Guests</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-head">
+      <div class="section-head-left">
+        <div class="section-kicker">Our selection</div>
+        <h2 class="section-title">Featured Rooms</h2>
+        <p class="section-sub">Comfort and elegance in every detail</p>
+      </div>
+      <button class="btn btn-gold-outline" onclick="navigate('rooms')">View all →</button>
+    </div>
+    <div class="rooms-grid" id="home-rooms-grid"></div>
+  </div>
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand"><span class="footer-brand-name">Hotel Booking</span></div>
+      <p class="footer-copy">&copy; <span id="year"></span> Hotel Booking. All rights reserved.</p>
+      <div class="footer-links">
+        <span class="footer-link">Privacy</span>
+        <span class="footer-link">Terms</span>
+        <span class="footer-link" onclick="navigate('rooms')">Rooms</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ROOMS
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-rooms">
+  <div class="container">
+    <div class="page-back-bar">
+      <button class="btn-back" onclick="navigate('home')">← Back to Home</button>
+    </div>
+    <div class="section-head anim-fade-up">
+      <div>
+        <div class="section-kicker">Immediate availability</div>
+        <h2 class="section-title">Our Rooms</h2>
+        <p class="section-sub">All rooms include continental breakfast</p>
+      </div>
+    </div>
+    <div class="room-rows" id="rooms-list"></div>
+  </div>
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-brand-name">Hotel Booking</span>
+      <p class="footer-copy">&copy; 2026 Hotel Booking.</p>
+    </div>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MY BOOKINGS
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-my-bookings">
+  <div class="container">
+    <div class="page-back-bar">
+      <button class="btn-back" onclick="navigate('home')">← Back to Home</button>
+    </div>
+    <div class="section-head anim-fade-up">
+      <div>
+        <div class="section-kicker">Your activity</div>
+        <h2 class="section-title">My Bookings</h2>
+        <p class="section-sub">Here you will see your bookings and any changes made by management.</p>
+      </div>
+    </div>
+    <div class="my-booking-list" id="my-bookings-list"></div>
+  </div>
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-brand-name">Hotel Booking</span>
+      <p class="footer-copy">&copy; 2026 Hotel Booking.</p>
+    </div>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     BOOKING
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-booking">
+  <div class="container-md">
+    <div class="page-back-bar">
+      <button class="btn-back" onclick="navigate('rooms')">← Back to Rooms</button>
+    </div>
+    <h2 class="section-title mb-24">Complete your booking</h2>
+    <div class="booking-layout">
+      <div>
+        <div class="booking-card">
+          <div class="booking-card-header">
+            <div class="booking-card-step">1</div>
+            <h3>Select dates</h3>
+          </div>
+          <div class="booking-card-body">
+            <div id="booking-err" class="alert alert-error hidden"></div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label form-label-light">Check-in date</label>
+                <input class="form-input form-input-light" id="booking-checkin" type="date" title="Check-in date" onchange="updateBookingSummary()"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label-light">Check-out date</label>
+                <input class="form-input form-input-light" id="booking-checkout" type="date" title="Check-out date" onchange="updateBookingSummary()"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label-light">Number of guests</label>
+              <input class="form-input form-input-light" id="booking-guests" type="number" min="1" max="10" value="1" title="Number of guests"/>
+            </div>
+            <button class="btn btn-gold btn-full btn-lg mt-20" onclick="goToPayment()">Continue to payment →</button>
+          </div>
+        </div>
+      </div>
+      <div class="summary-card" id="booking-room-summary"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAYMENT
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-payment">
+  <div class="container-md">
+    <div class="page-back-bar">
+      <button class="btn-back" onclick="navigate('booking')">← Back to Dates</button>
+    </div>
+    <h2 class="section-title mb-24">Payment method</h2>
+    <div class="booking-layout">
+      <div>
+        <div id="pay-err" class="alert alert-error hidden"></div>
+        <div class="pay-method-tabs">
+          <div class="pay-tab" id="tab-card" onclick="selectPayTab('card')">
+            <span class="tab-icon">💳</span> Card
+          </div>
+          <div class="pay-tab" id="tab-bank-transfer" onclick="selectPayTab('bank-transfer')">
+            <span class="tab-icon">🏦</span> Bank Transfer
+          </div>
+          <div class="pay-tab" id="tab-paypal" onclick="selectPayTab('paypal')">
+            <span class="tab-icon">🔵</span> PayPal
+          </div>
+          <div class="pay-tab" id="tab-cash" onclick="selectPayTab('cash')">
+            <span class="tab-icon">💵</span> Cash
+          </div>
+        </div>
+
+        <div class="booking-card">
+          <!-- Card -->
+          <div class="pay-section" id="ps-card" data-method="card">
+            <div class="booking-card-header"><div class="booking-card-step">💳</div><h3>Card details</h3></div>
+            <div class="booking-card-body">
+              <div class="form-group">
+                <label class="form-label form-label-light">Cardholder name</label>
+                <input class="form-input form-input-light" id="card-name" placeholder="As shown on the card"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label-light">Card number</label>
+                <input class="form-input form-input-light card-num-input" id="card-num"
+                  placeholder="1234  5678  9012  3456" maxlength="19"
+                  oninput="formatCardNumber(this)" inputmode="numeric"/>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label form-label-light">Expiration</label>
+                  <input class="form-input form-input-light" id="card-exp"
+                    placeholder="MM/YY" maxlength="5"
+                    oninput="formatCardExpiry(this)" inputmode="numeric"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label form-label-light">CVV</label>
+                  <input class="form-input form-input-light" id="card-cvv"
+                    placeholder="123" maxlength="4" type="password" inputmode="numeric"/>
+                </div>
+              </div>
+              <!-- Card preview -->
+              <div class="card-preview">
+                <div class="card-preview-chip">▐▌</div>
+                <div class="card-preview-number" id="prev-number">•••• •••• •••• ••••</div>
+                <div class="card-preview-row">
+                  <div>
+                    <div class="card-preview-label">Card holder</div>
+                    <div class="card-preview-val" id="prev-name">FULL NAME</div>
+                  </div>
+                  <div>
+                    <div class="card-preview-label">Expires</div>
+                    <div class="card-preview-val" id="prev-exp">MM/YY</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bank Transfer -->
+          <div class="pay-section" id="ps-bank-transfer" data-method="bank-transfer">
+            <div class="booking-card-header"><div class="booking-card-step">🏦</div><h3>Bank Transfer</h3></div>
+            <div class="booking-card-body">
+              <div class="alert alert-info">Make the bank transfer and show the receipt at reception.</div>
+              <div class="form-group">
+                <label class="form-label form-label-light">Your bank</label>
+                <input class="form-input form-input-light" id="bank-name" placeholder="Your bank name"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label-light">Account number</label>
+                <input class="form-input form-input-light" id="bank-account" placeholder="18 digits"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- PayPal -->
+          <div class="pay-section" id="ps-paypal" data-method="paypal">
+            <div class="booking-card-header"><div class="booking-card-step">🔵</div><h3>PayPal</h3></div>
+            <div class="booking-card-body">
+              <div class="form-group">
+                <label class="form-label form-label-light">PayPal email</label>
+                <input class="form-input form-input-light" id="pp-email" type="email" placeholder="email@paypal.com"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cash -->
+          <div class="pay-section" id="ps-cash" data-method="cash">
+            <div class="booking-card-header"><div class="booking-card-step">💵</div><h3>Pay at reception</h3></div>
+            <div class="booking-card-body">
+              <div class="alert alert-warn">Please arrive at reception with official ID. Payment is made at check-in.</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-gold btn-full btn-xl mt-20" onclick="confirmPayment()">
+          ✓ Confirm and finish booking
+        </button>
+        <p class="text-sm text-muted text-center mt-12">🔒 Your data is protected with SSL encryption</p>
+      </div>
+      <div class="summary-card" id="payment-summary-card"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     CONFIRMATION
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-confirm">
+  <div class="container-sm">
+    <div class="confirm-hero anim-fade-up">
+      <div class="confirm-icon-wrap">🎉</div>
+      <h2>Booking Confirmed!</h2>
+      <p>Your booking has been processed successfully. We look forward to welcoming you.</p>
+      <div class="confirm-notification-row" id="confirm-notif-row"></div>
+    </div>
+    <div class="detail-card anim-fade-up-2">
+      <div id="confirm-details"></div>
+    </div>
+    <div class="flex-center gap-12 mt-28 justify-center">
+      <button class="btn btn-gold btn-lg" onclick="navigate('home')">← Back home</button>
+      <button class="btn btn-ghost btn-lg" onclick="navigate('rooms')">See more rooms</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ADMIN — PANEL
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-admin-panel">
+  <div class="container">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="section-kicker">Welcome back</div>
+        <h2 class="title-reset">Dashboard</h2>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-gold-outline" onclick="doLogout()">⏻ Log out</button>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-icon">🛏️</div><div class="stat-num" id="ap-rooms">0</div><div class="stat-label">Rooms</div></div>
+      <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-num" id="ap-bookings">0</div><div class="stat-label">Bookings</div></div>
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-num" id="ap-users">0</div><div class="stat-label">Users</div></div>
+      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-num stat-num-lg" id="ap-revenue">$0</div><div class="stat-label">Total revenue</div></div>
+    </div>
+    <div class="section-kicker mb-16">Quick access</div>
+    <div class="admin-quick-grid mb-32">
+      <div class="admin-quick-btn" onclick="navigate('admin-rooms')">
+        <div class="admin-quick-icon">🛏️</div>
+        <div class="admin-quick-label">Rooms</div>
+        <div class="admin-quick-sub">Add, edit and delete</div>
+      </div>
+      <div class="admin-quick-btn" onclick="navigate('admin-bookings')">
+        <div class="admin-quick-icon">📋</div>
+        <div class="admin-quick-label">Bookings</div>
+        <div class="admin-quick-sub">Manage all bookings</div>
+      </div>
+      <div class="admin-quick-btn" onclick="navigate('admin-users')">
+        <div class="admin-quick-icon">👥</div>
+        <div class="admin-quick-label">Users</div>
+        <div class="admin-quick-sub">Manage accounts</div>
+      </div>
+      <div class="admin-quick-btn" onclick="navigate('admin-settings')">
+        <div class="admin-quick-icon">⚙️</div>
+        <div class="admin-quick-label">Settings</div>
+        <div class="admin-quick-sub">API Keys · WhatsApp · Email</div>
+      </div>
+    </div>
+    <div class="section-kicker mb-16">Recent bookings</div>
+    <div class="table-shell">
+      <table>
+        <thead><tr><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody id="ap-recent-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ADMIN — ROOMS
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-admin-rooms">
+  <div class="container">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-breadcrumb" onclick="navigate('admin-panel')">← Dashboard</div>
+        <h2>Rooms</h2>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-success" onclick="openRoomModal()">+ New room</button>
+        <button class="btn btn-gold-outline" onclick="doLogout()">⏻ Log out</button>
+      </div>
+    </div>
+    <div class="table-shell">
+      <table>
+        <thead><tr><th>Image</th><th>Name</th><th>Description</th><th>Price/night</th><th>Status</th><th>Amenities</th><th>Actions</th></tr></thead>
+        <tbody id="admin-rooms-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ADMIN — BOOKINGS
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-admin-bookings">
+  <div class="container">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-breadcrumb" onclick="navigate('admin-panel')">← Dashboard</div>
+        <h2>Bookings</h2>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-success" onclick="openBookingModal()">+ New booking</button>
+        <button class="btn btn-gold-outline" onclick="doLogout()">⏻ Log out</button>
+      </div>
+    </div>
+    <div class="table-shell">
+      <table>
+        <thead><tr><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Total</th><th>Paid</th><th>Notifications</th><th>Actions</th></tr></thead>
+        <tbody id="admin-bookings-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ADMIN — USERS
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-admin-users">
+  <div class="container">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-breadcrumb" onclick="navigate('admin-panel')">← Dashboard</div>
+        <h2>Users</h2>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-gold-outline" onclick="doLogout()">⏻ Log out</button>
+      </div>
+    </div>
+    <div class="table-shell">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Nationality</th><th>Role</th><th>Action</th></tr></thead>
+        <tbody id="admin-users-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ADMIN — SETTINGS
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-admin-settings">
+  <div class="container">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-breadcrumb" onclick="navigate('admin-panel')">← Dashboard</div>
+        <h2>Settings</h2>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-gold-outline" onclick="doLogout()">⏻ Log out</button>
+      </div>
+    </div>
+    <div class="settings-grid">
+      <div>
+        <div class="settings-nav-list">
+          <div class="settings-nav-item" id="settings-nav-general" onclick="openSettingsTab('general')">
+            <span class="settings-nav-icon">🏨</span> General
+          </div>
+          <div class="settings-nav-item" id="settings-nav-whatsapp" onclick="openSettingsTab('whatsapp')">
+            <span class="settings-nav-icon">📱</span> WhatsApp
+          </div>
+          <div class="settings-nav-item" id="settings-nav-gmail" onclick="openSettingsTab('gmail')">
+            <span class="settings-nav-icon">📧</span> Email (Gmail)
+          </div>
+        </div>
+      </div>
+      <div>
+        <!-- GENERAL -->
+        <div class="settings-panel" id="settings-panel-general">
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <div class="settings-card-title">Hotel Information</div>
+              <div class="settings-card-sub">General details that will appear in confirmations.</div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label form-label-light">Hotel name</label>
+                <input class="form-input form-input-light" id="cfg-hotel-name" placeholder="Hotel Booking"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label-light">Phone</label>
+                <input class="form-input form-input-light" id="cfg-hotel-phone" placeholder="+52 555 000 0000"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label-light">Address</label>
+              <input class="form-input form-input-light" id="cfg-hotel-address" placeholder="Street, City, Country"/>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label class="form-label form-label-light">Currency</label>
+                <select class="form-input form-input-light" id="cfg-currency" aria-label="Currency">
+                  <option value="USD">USD ($)</option>
+                  <option value="MXN">MXN ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label-light">Check-in time</label>
+                <input class="form-input form-input-light" id="cfg-checkin-time" type="time" value="15:00" title="Check-in time"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label-light">Check-out time</label>
+                <input class="form-input form-input-light" id="cfg-checkout-time" type="time" value="11:00" title="Check-out time"/>
+              </div>
+            </div>
+            <div class="flex-center gap-12">
+              <button class="btn btn-gold" onclick="saveGeneralSettings()">Save changes</button>
+              <div id="settings-general-saved" class="alert alert-success hidden">✓ Saved successfully</div>
+            </div>
+          </div>
+        </div>
+        <!-- WHATSAPP -->
+        <div class="settings-panel" id="settings-panel-whatsapp">
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <div class="flex-center gap-8">
+                <div class="settings-card-title">WhatsApp — Twilio</div>
+                <span id="wa-status-badge" class="settings-badge-status status-unconfigured">✗ Not configured</span>
+              </div>
+              <div class="settings-card-sub mt-8">Send booking confirmations automatically through WhatsApp using Twilio.</div>
+            </div>
+            <div class="integration-logo">
+              <div class="i-icon i-icon-wa">📱</div>
+              <div>
+                <h4>Twilio WhatsApp API</h4>
+                <p>Business messaging service — <a class="api-help-link" href="https://console.twilio.com" target="_blank" rel="noopener noreferrer">Go to Twilio Console ↗</a></p>
+              </div>
+            </div>
+            <div class="toggle-wrap">
+              <div class="toggle-info">
+                <h5>Enable WhatsApp notifications</h5>
+                <p>A message will be sent when each booking is confirmed</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="wa-enabled" aria-label="Enable WhatsApp notifications"/>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="separator"></div>
+            <div class="form-group">
+              <label class="form-label form-label-light">Account SID</label>
+              <div class="api-input-wrap">
+                <input class="form-input form-input-light" id="wa-account-sid" type="password" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+                <button class="api-eye-btn" id="wa-sid-eye" onclick="toggleApiVisibility('wa-account-sid','wa-sid-eye')">👁</button>
+              </div>
+              <a class="api-help-link" href="https://console.twilio.com" target="_blank" rel="noopener noreferrer">Find it in: Twilio Console → Account Info ↗</a>
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label-light">Auth Token</label>
+              <div class="api-input-wrap">
+                <input class="form-input form-input-light" id="wa-auth-token" type="password" placeholder="Your Twilio auth token"/>
+                <button class="api-eye-btn" id="wa-token-eye" onclick="toggleApiVisibility('wa-auth-token','wa-token-eye')">👁</button>
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label form-label-light">Twilio WhatsApp number (From)</label>
+                <input class="form-input form-input-light" id="wa-from-number" placeholder="whatsapp:+14155238886"/>
+                <span class="form-hint">Format: whatsapp:+1XXXXXXXXXX</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label-light">Destination number (To)</label>
+                <input class="form-input form-input-light" id="wa-to-number" placeholder="whatsapp:+521XXXXXXXXX"/>
+                <span class="form-hint">Admin or guest number</span>
+              </div>
+            </div>
+            <div class="alert alert-warn mt-12">
+              ⚠️ <strong>Security note:</strong> Credentials are saved in the browser (localStorage). For production, create a server endpoint that calls Twilio from the backend.
+            </div>
+            <div class="test-btn-row">
+              <button class="btn btn-gold" onclick="saveWhatsAppSettings()">Save</button>
+              <button class="btn btn-neutral" onclick="testWhatsApp()">Test settings</button>
+              <span class="test-result" id="wa-test-result"></span>
+            </div>
+            <div id="settings-wa-saved" class="alert alert-success mt-12 hidden">✓ Settings saved successfully</div>
+          </div>
+        </div>
+        <!-- GMAIL / EMAILJS -->
+        <div class="settings-panel" id="settings-panel-gmail">
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <div class="flex-center gap-8">
+                <div class="settings-card-title">Email — EmailJS</div>
+                <span id="gm-status-badge" class="settings-badge-status status-unconfigured">✗ Not configured</span>
+              </div>
+              <div class="settings-card-sub mt-8">Send booking confirmations by email using EmailJS (compatible with Gmail and others).</div>
+            </div>
+            <div class="integration-logo">
+              <div class="i-icon i-icon-gm">📧</div>
+              <div>
+                <h4>EmailJS — Emails from the browser</h4>
+                <p>No backend required — <a class="api-help-link" href="https://dashboard.emailjs.com" target="_blank" rel="noopener noreferrer">Go to EmailJS Dashboard ↗</a></p>
+              </div>
+            </div>
+            <div class="toggle-wrap">
+              <div class="toggle-info">
+                <h5>Enable email notifications</h5>
+                <p>An email will be sent when each booking is confirmed</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="gm-enabled" aria-label="Enable email notifications"/>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="separator"></div>
+            <div class="alert alert-info">
+              📌 <strong>Steps to configure EmailJS:</strong><br>
+              1. Create an account at emailjs.com → add an <em>Email Service</em> (Gmail, Outlook…)<br>
+              2. Create an <em>Email Template</em> with variables: <code>{{to_name}}, {{to_email}}, {{room_name}}, {{check_in}}, {{check_out}}, {{nights}}, {{total}}, {{hotel_name}}</code><br>
+              3. Copy the EmailJS CDN and uncomment it in the <code>&lt;head&gt;</code> of the HTML<br>
+              4. Paste the keys here and save.
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label form-label-light">Service ID</label>
+                <div class="api-input-wrap">
+                  <input class="form-input form-input-light" id="gm-service-id" type="password" placeholder="service_xxxxxxx"/>
+                  <button class="api-eye-btn" id="gm-sid-eye" onclick="toggleApiVisibility('gm-service-id','gm-sid-eye')">👁</button>
+                </div>
+                <a class="api-help-link" href="https://dashboard.emailjs.com/admin" target="_blank" rel="noopener noreferrer">Email Services → Service ID ↗</a>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label-light">Template ID</label>
+                <div class="api-input-wrap">
+                  <input class="form-input form-input-light" id="gm-template-id" type="password" placeholder="template_xxxxxxx"/>
+                  <button class="api-eye-btn" id="gm-tid-eye" onclick="toggleApiVisibility('gm-template-id','gm-tid-eye')">👁</button>
+                </div>
+                <a class="api-help-link" href="https://dashboard.emailjs.com/admin/templates" target="_blank" rel="noopener noreferrer">Email Templates → Template ID ↗</a>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label-light">Public Key</label>
+              <div class="api-input-wrap">
+                <input class="form-input form-input-light" id="gm-public-key" type="password" placeholder="xxxxxxxxxxxxxxx"/>
+                <button class="api-eye-btn" id="gm-pk-eye" onclick="toggleApiVisibility('gm-public-key','gm-pk-eye')">👁</button>
+              </div>
+              <a class="api-help-link" href="https://dashboard.emailjs.com/admin/account" target="_blank" rel="noopener noreferrer">Account → Public Key ↗</a>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label form-label-light">Sender email</label>
+                <input class="form-input form-input-light" id="gm-from-email" type="email" placeholder="bookings@hotel.com"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label-light">Admin email (for tests)</label>
+                <input class="form-input form-input-light" id="gm-admin-email" type="email" placeholder="admin@hotel.com"/>
+              </div>
+            </div>
+            <div class="test-btn-row">
+              <button class="btn btn-gold" onclick="saveGmailSettings()">Save</button>
+              <button class="btn btn-neutral" onclick="testGmail()">Send test email</button>
+              <span class="test-result" id="gm-test-result"></span>
+            </div>
+            <div id="settings-gm-saved" class="alert alert-success mt-12 hidden">✓ Settings saved successfully</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — ROOM
+═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-room">
+  <div class="modal-box">
+    <h3 id="rm-title">New Room</h3>
+    <input type="hidden" id="rm-id"/>
+    <div class="form-group">
+      <label class="form-label form-label-dark">Name</label>
+      <input class="form-input form-input-dark" id="rm-name" placeholder="E.g. Presidential Suite"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label form-label-dark">Description</label>
+      <textarea class="form-input form-input-dark" id="rm-desc" rows="3" placeholder="Describe the room..."></textarea>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label class="form-label form-label-dark">Price per night ($)</label>
+        <input class="form-input form-input-dark" id="rm-price" type="number" placeholder="0"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label form-label-dark">Image</label>
+        <select class="form-input form-input-dark" id="rm-img" aria-label="Room image">
+          <option value="room1">room1.png</option>
+          <option value="room2">room2.png</option>
+          <option value="room3">room3.png</option>
+          <option value="room4">room4.png</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label form-label-dark">Amenities <small class="text-normal">(comma separated)</small></label>
+      <input class="form-input form-input-dark" id="rm-amenities" placeholder="Wi-Fi, Jacuzzi, Balcony, Minibar"/>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-neutral" onclick="closeModal('modal-room')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveRoom()">Save room</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — BOOKING (admin)
+═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-booking">
+  <div class="modal-box">
+    <h3 id="booking-modal-title">New Booking</h3>
+    <input type="hidden" id="booking-modal-id"/>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label class="form-label form-label-dark">Guest name</label>
+        <input class="form-input form-input-dark" id="booking-guest-input" placeholder="Full name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label form-label-dark">Email</label>
+        <input class="form-input form-input-dark" id="booking-email-input" type="email" placeholder="email@example.com"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label form-label-dark">Room</label>
+      <select class="form-input form-input-dark" id="booking-room-select" aria-label="Room"></select>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label class="form-label form-label-dark">Check-in</label>
+        <input class="form-input form-input-dark" id="booking-checkin-input" type="date" title="Check-in date"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label form-label-dark">Check-out</label>
+        <input class="form-input form-input-dark" id="booking-checkout-input" type="date" title="Check-out date"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label form-label-dark">Total ($)</label>
+      <input class="form-input form-input-dark" id="booking-total-input" type="number" placeholder="0"/>
+    </div>
+    <div class="checkbox-wrapper">
+      <input type="checkbox" id="booking-paid-check"/>
+      <label class="form-label form-label-dark" for="booking-paid-check">Marked as paid</label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-neutral" onclick="closeModal('modal-booking')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveBooking()">Save booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — CONFIRM DELETE
+═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-del">
+  <div class="modal-box modal-box-sm">
+    <h3>Confirm deletion</h3>
+    <p class="text-muted mt-12" id="del-msg">This action cannot be undone.</p>
+    <div class="modal-foot">
+      <button class="btn btn-neutral" onclick="closeModal('modal-del')">Cancel</button>
+      <button class="btn btn-danger" onclick="execDelete()">Yes, delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SGNIA CHATBOT — BURBUJA + VENTANA DE CHAT
+══════════════════════════════════════════════════════════ -->
+<!-- Burbuja flotante (avatar circular) -->
+<div id="sgnia-bubble" onclick="toggleChat()" title="Chatea con SGNIA" role="button" aria-label="Abrir chat con SGNIA" tabindex="0">
+  <div class="sgnia-bubble-ring"></div>
+  <div class="sgnia-bubble-inner">
+    <span class="sgnia-bubble-icon">S</span>
+  </div>
+  <div class="sgnia-bubble-ping" aria-hidden="true"></div>
+</div>
+
+<!-- Ventana de chat (oculta por defecto) -->
+<div id="sgnia-window" class="hidden" role="dialog" aria-label="Chat con SGNIA">
+  <div class="sgnia-header">
+    <div class="sgnia-header-left">
+      <div class="sgnia-header-avatar">S</div>
+      <div>
+        <div class="sgnia-header-name">SGNIA</div>
+        <div class="sgnia-header-status"><span class="sgnia-status-dot"></span> Online — Virtual Assistant</div>
+      </div>
+    </div>
+    <button class="sgnia-close" onclick="toggleChat()" aria-label="Cerrar chat">✕</button>
+  </div>
+
+  <div class="sgnia-body">
+    <div class="sgnia-messages" id="sgnia-messages" role="log" aria-live="polite"></div>
+    <div class="sgnia-quick-replies" id="sgnia-quick-replies" role="list" aria-label="Respuestas rápidas"></div>
+  </div>
+
+  <div class="sgnia-footer">
+    <div class="sgnia-input-row">
+      <input class="sgnia-input" id="sgnia-input" placeholder="Escribe un mensaje…" aria-label="Mensaje"
+        onkeydown="if(event.key==='Enter') sendSgniaMessage()"/>
+      <button class="sgnia-send" onclick="sendSgniaMessage()" aria-label="Enviar mensaje">➤</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Duplicate SGNIA window removed (duplicate IDs) -->
+
+
+<script src="script.js"></script>
+</body>
+</html>
