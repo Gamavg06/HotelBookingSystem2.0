@@ -689,20 +689,20 @@ function renderAdminUsers() {
     if (!tableBody) return;
 
     tableBody.innerHTML = '';
-    const loggedInUser = db.currentUser;
+    const loggedInUser = db.currentUser; // Sincronizado con tu sistema de sesión nativo
 
-    // Usamos la lista completa de usuarios sin filtrar al admin activo
-    const usersToRender = db.users;
+    const usersToRender = db.users || [];
 
     usersToRender.forEach(user => {
         const tr = document.createElement('tr');
-        
-        // Verificamos si la fila actual es la del administrador logueado
         const isSelf = loggedInUser && user.email === loggedInUser.email;
 
         tr.innerHTML = `
             <td>${user.id}</td>
-            <td>${user.name} ${isSelf ? '<span style="color: #007bff; font-weight: bold;">(Tú)</span>' : ''}</td>
+            <td>
+                ${user.name}
+                ${isSelf ? '<span style="color:#007bff;font-weight:bold;">(Tú)</span>' : ''}
+            </td>
             <td>${user.email}</td>
             <td>${user.role}</td>
             <td>
@@ -714,10 +714,12 @@ function renderAdminUsers() {
                 <button class="btn-action btn-edit" onclick="openEditUserModal(${user.id})">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn-action btn-toggle" onclick="toggleUserStatus(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;" title="No puedes inactivar tu propia cuenta"' : ''}>
+                <button class="btn-action btn-toggle" onclick="toggleUserStatus(${user.id})"
+                    ${isSelf ? 'disabled style="opacity:0.5;cursor:not-allowed;" title="No puedes inactivar tu propia cuenta"' : ''}>
                     <i class="fas ${user.active ? 'fa-user-slash' : 'fa-user-check'}"></i>
                 </button>
-                <button class="btn-action btn-delete" onclick="deleteUser(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;" title="No puedes eliminar tu propia cuenta"' : ''}>
+                <button class="btn-action btn-delete" onclick="deleteUser(${user.id})"
+                    ${isSelf ? 'disabled style="opacity:0.5;cursor:not-allowed;" title="No puedes eliminar tu propia cuenta"' : ''}>
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -728,11 +730,10 @@ function renderAdminUsers() {
 
 // Buscar usuarios en el panel de admin
 const adminSearchInput = document.getElementById('adminSearchInput');
-
 if (adminSearchInput) {
     adminSearchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
-        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        const loggedInUser = db.currentUser; // Sincronizado con tu sistema de sesión nativo
 
         const filteredUsers = db.users.filter(user =>
             user.name.toLowerCase().includes(searchTerm) ||
@@ -741,7 +742,6 @@ if (adminSearchInput) {
         );
 
         const tableBody = document.getElementById('adminUsersTableBody');
-
         if (tableBody) {
             tableBody.innerHTML = '';
 
@@ -763,20 +763,20 @@ if (adminSearchInput) {
                         <button class="btn-action btn-edit" onclick="openEditUserModal(${user.id})">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn-action btn-toggle" onclick="toggleUserStatus(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        <button class="btn-action btn-toggle" onclick="toggleUserStatus(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;" title="No puedes inactivar tu propia cuenta"' : ''}>
                             <i class="fas ${user.active ? 'fa-user-slash' : 'fa-user-check'}"></i>
                         </button>
-                        <button class="btn-action btn-delete" onclick="deleteUser(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        <button class="btn-action btn-delete" onclick="deleteUser(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;" title="No puedes eliminar tu propia cuenta"' : ''}>
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
                 `;
-
                 tableBody.appendChild(tr);
             });
         }
     });
 }
+
 // ── SETTINGS ──────────────────────────────────────────────────
 function renderSettings() { loadSettingsValues(); openSettingsTab('general'); }
 
@@ -953,6 +953,7 @@ function sgniaGetResponse(intent) {
 
 function sgniaRenderMessage(text, isBot) {
   const container = $('sgnia-messages');
+  if (!container) return;
   const div = document.createElement('div');
   div.className = `sgnia-msg ${isBot ? 'sgnia-msg-bot' : 'sgnia-msg-user'}`;
   const formatted = text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br/>');
@@ -963,6 +964,7 @@ function sgniaRenderMessage(text, isBot) {
 
 function sgniaShowTyping() {
   const container = $('sgnia-messages');
+  if (!container) return;
   const div = document.createElement('div');
   div.className = 'sgnia-msg sgnia-msg-bot';
   div.id = 'sgnia-typing-indicator';
@@ -990,6 +992,7 @@ function sgniaSendQuick(text) {
 
 function sendSgniaMessage() {
   const input = $('sgnia-input');
+  if (!input) return;
   const text  = input.value.trim();
   if (!text) return;
   input.value = '';
@@ -1006,7 +1009,6 @@ function sgniaRespondTo(text) {
     const response = sgniaGetResponse(intent);
     sgniaRenderMessage(response, true);
 
-    // Contextual quick replies
     const qrMap = {
       greet:   ['View rooms', 'Prices', 'How to book', 'Services'],
       rooms:   ['How to book', 'Check-in time', 'Prices'],
@@ -1033,6 +1035,7 @@ function sgniaInit() {
 
 function toggleChat() {
   const win = $('sgnia-window');
+  if (!win) return;
   sgniaOpen = !sgniaOpen;
   win.classList.toggle('hidden', !sgniaOpen);
   if (sgniaOpen) { sgniaInit(); setTimeout(()=>{ const inp=$('sgnia-input'); if(inp) inp.focus(); }, 100); }
