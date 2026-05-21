@@ -12,10 +12,9 @@
     measurementId: "G-N24Y9G1L74"
   };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-
+ // Borra las dos líneas anteriores y pon estas:
+firebase.initializeApp(firebaseConfig);
+const fs = firebase.firestore(); // Con esto dejas lista tu base de datos "fs"
 
 const IMG = key => `wwwroot/images/${key}.png`;
 const DB_KEY      = 'hotelDB5';
