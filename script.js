@@ -25,12 +25,12 @@ function loadDB() {
     const stored  = JSON.parse(s);
     const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
     db = { ...db, ...stored, currentUser: session.currentUser || stored.currentUser || null, pending: session.pending || stored.pending || null };
+    if (!db.users || db.users.length === 0) {
+      db.users = defaultUsers();
+    }
     syncCurrentUser(); saveDB(); return;
   }
-  db.users = [
-    { id:1, name:'Admin', lastName:'System',  age:30, phone:'5550001', nationality:'MX', email:'admin@hotel.com', password:'admin123', role:'Admin' },
-    { id:2, name:'John',  lastName:'Smith',   age:28, phone:'5551234', nationality:'MX', email:'john@test.com',   password:'123456',   role:'User'  }
-  ];
+  db.users = defaultUsers();
   db.rooms = [
     { id:1, name:'Presidential Suite',    desc:'Luxury suite with panoramic view, private jacuzzi and 24-hour personal butler service.',            price:450, img:'room1', amenities:['Jacuzzi','Panoramic view','Butler','Wi-Fi 1Gbps'] },
     { id:2, name:'Deluxe Double Room',    desc:'Spacious room with two queen-size beds, private balcony, minibar and room service.',                 price:220, img:'room2', amenities:['2 Queen beds','Balcony','Minibar','Room service'] },
@@ -41,8 +41,14 @@ function loadDB() {
     { id:1, roomId:1, userId:2, guest:'John Smith', email:'john@test.com', checkIn:'2026-06-01', checkOut:'2026-06-05', total:1800, nights:4, paid:true, method:'card', ref:'John Smith', notifWa:false, notifEmail:false, createdAt:new Date().toISOString() }
   ];
   saveDB();
-}
+}                          // ← llave de cierre de loadDB()
 
+function defaultUsers() { // ← función SEPARADA, fuera de loadDB()
+  return [
+    { id:1, name:'Admin', lastName:'System', age:30, phone:'5550001', nationality:'MX', email:'admin@hotel.com', password:'admin123', role:'Admin' },
+    { id:2, name:'John',  lastName:'Smith',  age:28, phone:'5551234', nationality:'MX', email:'john@test.com',  password:'123456',  role:'User'  }
+  ];
+}
 function saveDB() {
   const { currentUser, pending, ...data } = db;
   localStorage.setItem(DB_KEY, JSON.stringify({ ...data, currentUser:null, pending:null }));
