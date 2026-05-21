@@ -4,9 +4,9 @@
 // ╚═══════════════════════════════════════════════════════════╝
  const firebaseConfig = {
     apiKey: "AIzaSyB73giypNiO2q2M6lz_W6vf4WkVZkA2o9c",
-    authDomain: "hotelbookingsystem-4da28.firebaseapp.com",
-    projectId: "hotelbookingsystem-4da28",
-    storageBucket: "hotelbookingsystem-4da28.firebasestorage.app",
+    authDomain: "hotelbookingsystem-cf49c.firebaseapp.com",
+    projectId: "hotelbookingsystem-cf49c",
+    storageBucket: "hotelbookingsystem-cf49c.firebasestorage.app",
     messagingSenderId: "286277173585",
     appId: "1:286277173585:web:2e58261b7562b6f8bc5370",
     measurementId: "G-N24Y9G1L74"
@@ -1030,3 +1030,14 @@ window.addEventListener('storage', (event) => {
   if (!db.currentUser&&!['login','register'].includes(currentPage)) { navigate('login'); return; }
   refreshCurrentPage();
 });
+// ── FUNCIÓN DE RESPALDO PARA EVITAR EL ERROR DE NAVEGACIÓN ──
+function syncCurrentUser() {
+  // Sincroniza el usuario actual con la sesión del navegador
+  if (db && db.currentUser) {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+      currentUser: db.currentUser,
+      pending: db.pending
+    }));
+  }
+  console.log("Usuario actual sincronizado correctamente.");
+}
