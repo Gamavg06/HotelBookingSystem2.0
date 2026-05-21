@@ -642,33 +642,29 @@ function saveRoom() {
 
 // ── ADMIN BOOKINGS ────────────────────────────────────────────
 function renderAdminBookings() {
-  const tbody = $('admin-bookings-tbody');
-  if (!tbody) return;
-  if (!db.bookings.length) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:36px;color:var(--stone-400)">No bookings.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = db.bookings.map(r => {
-    const room = db.rooms.find(rm=>rm.id===r.roomId);
-    const waIcon  = r.notifWa    ? '📱✓' : (db.config.whatsapp.enabled ? '📱?' : '—');
-    const emlIcon = r.notifEmail ? '📧✓' : (db.config.gmail.enabled    ? '📧?' : '—');
-    return `<tr>
-      <td><strong>${r.guest}</strong><br><span style="font-size:.76rem;color:var(--stone-500)">${r.email}</span></td>
-      <td>${room?.name||'—'}</td>
-      <td>${fmtDate(r.checkIn)}</td>
-      <td>${fmtDate(r.checkOut)}</td>
-      <td>${r.nights||'—'}</td>
-      <td><strong>${fmtMoney(r.total)}</strong></td>
-      <td><span class="badge ${r.paid?'badge-yes':'badge-no'}">${r.paid?'Paid':'Pending'}</span></td>
-      <td style="font-size:.78rem;color:var(--stone-500)">${waIcon} ${emlIcon}</td>
-      <td style="white-space:nowrap;">
-        <button class="btn btn-gold btn-sm" onclick="editBooking(${r.id})">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('booking',${r.id})">Delete</button>
-      </td>
-    </tr>`;
+  // CORRECCIÓN: Se cambió 'adminBookingsTableBody' por 'admin-bookings-tbody'
+  const tableBody = document.getElementById('admin-bookings-tbody');
+  if (!tableBody) return;
+
+  tableBody.innerHTML = db.bookings.map(b => {
+    return `
+      <tr>
+        <td><strong>${b.guest}</strong><br><span style="font-size:.76rem;color:var(--stone-500)">${b.email}</span></td>
+        <td>${getRoomName(b.roomId)}</td>
+        <td>${b.checkIn}</td>
+        <td>${b.checkOut}</td>
+        <td>${b.nights}</td>
+        <td><strong>${fmtMoney(b.total)}</strong></td>
+        <td><span class="badge ${b.paid?'badge-yes':'badge-no'}">${b.paid?'Paid':'Pending'}</span></td>
+        <td style="font-size:.78rem;color:var(--stone-500)">${b.ref || '—'}</td>
+        <td>
+          <button class="btn btn-gold btn-sm" onclick="editBooking(${b.id})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal('booking',${b.id})">Delete</button>
+        </td>
+      </tr>
+    `;
   }).join('');
 }
-
 function openBookingModal(id) {
   const sel = $('booking-room-select');
   sel.innerHTML = db.rooms.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
@@ -715,47 +711,26 @@ function saveBooking() {
 
 // ── ADMIN USERS ───────────────────────────────────────────────
 function renderAdminUsers() {
-    const tableBody = document.getElementById('adminUsersTableBody');
-    if (!tableBody) return;
+  // CORRECCIÓN: Se cambió 'adminUsersTableBody' por 'admin-users-tbody'
+  const tableBody = document.getElementById('admin-users-tbody');
+  if (!tableBody) return;
 
-    tableBody.innerHTML = '';
-    const loggedInUser = db.currentUser; // Sincronizado con tu sistema de sesión nativo
-
-    const usersToRender = db.users || [];
-
-    usersToRender.forEach(user => {
-        const tr = document.createElement('tr');
-        const isSelf = loggedInUser && user.email === loggedInUser.email;
-
-        tr.innerHTML = `
-            <td>${user.id}</td>
-            <td>
-                ${user.name}
-                ${isSelf ? '<span style="color:#007bff;font-weight:bold;">(Tú)</span>' : ''}
-            </td>
-            <td>${user.email}</td>
-            <td>${user.role}</td>
-            <td>
-                <span class="status-badge ${user.active ? 'status-active' : 'status-inactive'}">
-                    ${user.active ? 'Activo' : 'Inactivo'}
-                </span>
-            </td>
-            <td>
-                <button class="btn-action btn-edit" onclick="openEditUserModal(${user.id})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-action btn-toggle" onclick="toggleUserStatus(${user.id})"
-                    ${isSelf ? 'disabled style="opacity:0.5;cursor:not-allowed;" title="No puedes inactivar tu propia cuenta"' : ''}>
-                    <i class="fas ${user.active ? 'fa-user-slash' : 'fa-user-check'}"></i>
-                </button>
-                <button class="btn-action btn-delete" onclick="deleteUser(${user.id})"
-                    ${isSelf ? 'disabled style="opacity:0.5;cursor:not-allowed;" title="No puedes eliminar tu propia cuenta"' : ''}>
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
-        tableBody.appendChild(tr);
-    });
+  tableBody.innerHTML = db.users.map(u => {
+    const isSelf = db.currentUser && db.currentUser.id === u.id;
+    return `
+      <tr>
+        <td>${u.id}</td>
+        <td><strong>${u.name} ${u.lastName}</strong> ${isSelf ? '<span class="badge badge-user">(Tú)</span>':''}</td>
+        <td>${u.email}</td>
+        <td>${u.role}</td>
+        <td><span class="status-dot ${u.active?'dot-active':'dot-inactive'}"></span> ${u.active?'Active':'Inactive'}</td>
+        <td>
+          <button class="btn btn-gold btn-sm" onclick="editUser(${u.id})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal('user',${u.id})" ${isSelf?'disabled style="opacity:0.5; cursor:not-allowed;"':''}>Delete</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 
 // Buscar usuarios en el panel de admin
