@@ -2,6 +2,20 @@
 // ║  Hotel Booking — script.js                                ║
 // ║  + SGNIA Chatbot + Card formatting                        ║
 // ╚═══════════════════════════════════════════════════════════╝
+ const firebaseConfig = {
+    apiKey: "AIzaSyB73giypNiO2q2M6lz_W6vf4WkVZkA2o9c",
+    authDomain: "hotelbookingsystem-4da28.firebaseapp.com",
+    projectId: "hotelbookingsystem-4da28",
+    storageBucket: "hotelbookingsystem-4da28.firebasestorage.app",
+    messagingSenderId: "286277173585",
+    appId: "1:286277173585:web:2e58261b7562b6f8bc5370",
+    measurementId: "G-N24Y9G1L74"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
 
 const IMG = key => `wwwroot/images/${key}.png`;
 const DB_KEY      = 'hotelDB5';
@@ -20,95 +34,48 @@ let db = {
 let currentPage = '';
 
 function loadDB() {
-  const s = localStorage.getItem(DB_KEY);
-  if (s) {
-    const stored  = JSON.parse(s);
-    const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
-    db = { ...db, ...stored, currentUser: session.currentUser || stored.currentUser || null, pending: session.pending || stored.pending || null };
-    if (!db.users || db.users.length === 0) {
-      db.users = defaultUsers();
-    }
-    syncCurrentUser(); saveDB(); return;
-  }
-  db.users = defaultUsers();
-  db.rooms = [
-    { id:1, name:'Presidential Suite',    desc:'Luxury suite with panoramic view, private jacuzzi and 24-hour personal butler service.',            price:450, img:'room1', amenities:['Jacuzzi','Panoramic view','Butler','Wi-Fi 1Gbps'] },
-    { id:2, name:'Deluxe Double Room',    desc:'Spacious room with two queen-size beds, private balcony, minibar and room service.',                 price:220, img:'room2', amenities:['2 Queen beds','Balcony','Minibar','Room service'] },
-    { id:3, name:'Junior Studio',         desc:'Designed for the modern business traveler: executive desk, premium coffee maker and ultra-fast Wi-Fi.',price:150, img:'room3', amenities:['Desk','Coffee maker','Wi-Fi','Safe'] },
-    { id:4, name:'Pool Villa',            desc:'Private villa with exclusive personal-use pool, tropical garden and fully equipped kitchen.',          price:680, img:'room4', amenities:['Private pool','Garden','Kitchen','Living room'] },
-  ];
-  db.bookings = [
-    { id:1, roomId:1, userId:2, guest:'John Smith', email:'john@test.com', checkIn:'2026-06-01', checkOut:'2026-06-05', total:1800, nights:4, paid:true, method:'card', ref:'John Smith', notifWa:false, notifEmail:false, createdAt:new Date().toISOString() }
-  ];
-  saveDB();
-}                          // ← llave de cierre de loadDB()
-// ── DB CONFIG & DEFAULTS ──────────────────────────────────────
-function defaultUsers() {
-  return [
-    {
-      id: 1,
-      name: 'Admin',
-      lastName: 'System',
-      age: 30,
-      phone: '5550001',
-      nationality: 'MX',
-      email: 'admin@hotel.com',
-      password: 'admin123',
-      role: 'Admin',
-      active: true
-    },
-    {
-      id: 2,
-      name: 'John',
-      lastName: 'Smith',
-      age: 28,
-      phone: '5551234',
-      nationality: 'MX',
-      email: 'john@test.com',
-      password: '123456',
-      role: 'User',
-      active: true
-    }
-  ];
-}
-
-function loadDB() {
-  const s = localStorage.getItem(DB_KEY);
-  if (s) {
-    const stored  = JSON.parse(s);
-    const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
-    db = { 
-      ...db, 
-      ...stored, 
-      currentUser: session.currentUser || stored.currentUser || null, 
-      pending: session.pending || stored.pending || null 
-    };
+  // 1. Escuchar la colección de Usuarios en tiempo real desde Firebase
+  fs.collection("users").onSnapshot((snapshot) => {
+    db.users = [];
+    snapshot.forEach((doc) => {
+      db.users.push(doc.data());
+    });
     
-    // Si por alguna razón la lista de usuarios se quedó vacía en el storage, inyectamos los defaults
-    if (!db.users || db.users.length === 0) {
-      db.users = defaultUsers();
+    // Si la base en la nube está vacía la primera vez, inyectamos el administrador base
+    if (db.users.length === 0) {
+      db.users = [
+        { id: 1, name: 'Admin', lastName: 'System', age: 30, phone: '5550001', nationality: 'MX', email: 'admin@hotel.com', password: 'admin123', role: 'Admin', active: true }
+      ];
       saveDB();
     }
-  } else {
-    // PRIMERA VEZ EN LA APP: Poblamos la base de datos con los usuarios por defecto
-    db.users = defaultUsers();
-    db.rooms = db.rooms || [];
-    db.bookings = db.bookings || [];
-    saveDB();
-  }
-  syncCurrentUser();
+    
+    // Refrescar tabla de administración de forma automática
+    if (typeof renderAdminUsers === 'function') renderAdminUsers();
+  });
+
+  // 2. Escuchar la colección de Reservaciones en tiempo real desde Firebase
+  fs.collection("bookings").onSnapshot((snapshot) => {
+    db.bookings = [];
+    snapshot.forEach((doc) => {
+      db.bookings.push(doc.data());
+    });
+    
+    if (typeof renderAdminBookings === 'function') renderAdminBookings();
+  });
+
+  // 3. Habitaciones estables por defecto
+  db.rooms = [
+    { id: 1, name: 'Presidential Suite', desc: 'Luxury suite with panoramic view, private jacuzzi and 24-hour personal butler service.', price: 450, img: 'room1', amenities: ['Jacuzzi','Panoramic view','Butler','Wi-Fi 1Gbps'], active: true },
+    { id: 2, name: 'Deluxe Double Room', desc: 'Spacious room with two queen-size beds, private balcony, minibar and room service.', price: 220, img: 'room2', amenities: ['2 Queen beds','Balcony','Minibar','Room service'], active: true }
+  ];
+
+  // Mantener la sesión iniciada en el navegador actual
+  const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
+  db.currentUser = session.currentUser || null;
+  db.pending = session.pending || null;
 }
 
 function saveDB() {
-  localStorage.setItem(DB_KEY, JSON.stringify({
-    users: db.users,
-    rooms: db.rooms,
-    bookings: db.bookings,
-    config: db.config,
-    currentUser: null,
-    pending: null
-  }));
-
   if (db.currentUser || db.pending) {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify({
       currentUser: db.currentUser,
@@ -117,23 +84,16 @@ function saveDB() {
   } else {
     sessionStorage.removeItem(SESSION_KEY);
   }
+
+  // ☁️ Subida inmediata de registros a las colecciones de Firebase
+  db.users.forEach(user => {
+    fs.collection("users").doc(user.id.toString()).set(user);
+  });
+
+  db.bookings.forEach(booking => {
+    fs.collection("bookings").doc(booking.id.toString()).set(booking);
+  });
 }
-
-function syncCurrentUser() {
-  if (!db.currentUser) return;
-  const fresh = db.users.find(u => u.id === db.currentUser.id);
-  db.currentUser = fresh || null;
-}
-
-function refreshCurrentPage() {
-  updateNav();
-  updateUserPageHeader();
-  const r = { home:renderHome, rooms:renderRooms, 'my-bookings':renderMyBookings, booking:renderBookingPage, payment:renderPaymentPage, 'admin-panel':renderAdminPanel, 'admin-rooms':renderAdminRooms, 'admin-bookings':renderAdminBookings, 'admin-users':renderAdminUsers, 'admin-settings':renderSettings };
-  if (r[currentPage]) r[currentPage]();
-}
-
-function persistAndRefresh() { saveDB(); refreshCurrentPage(); }
-
 // ── UTILS ─────────────────────────────────────────────────────
 const $  = id  => document.getElementById(id);
 const $$ = sel => document.querySelector(sel);
