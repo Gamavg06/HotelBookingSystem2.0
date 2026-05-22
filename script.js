@@ -69,11 +69,23 @@ function loadDB() {
     { id: 2, name: 'Deluxe Double Room', desc: 'Spacious room with two queen-size beds, private balcony, minibar and room service.', price: 220, img: 'room2', amenities: ['2 Queen beds','Balcony','Minibar','Room service'], active: true }
   ];
 
+ // ... (Aquí viene el final de tus colecciones de Firebase dentro de loadDB)
+  fs.collection("bookings").onSnapshot((snapshot) => {
+    db.bookings = [];
+    snapshot.forEach((doc) => {
+      db.bookings.push(doc.data());
+    });
+    
+    if (typeof renderAdminBookings === 'function') renderAdminBookings();
+  });
+
+  // ── AQUÍ SE QUEDABAN HÚERFANAS ESTAS LÍNEAS ──
   // Mantener la sesión iniciada en el navegador actual
   const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
   db.currentUser = session.currentUser || null;
   db.pending = session.pending || null;
-}
+
+ // <- AQUÍ es donde debe cerrar formalmente la función loadDB()
 
 function saveDB() {
   if (db.currentUser || db.pending) {
@@ -1040,4 +1052,4 @@ function syncCurrentUser() {
     }));
   }
   console.log("Usuario sincronizado.");
-}
+ }
