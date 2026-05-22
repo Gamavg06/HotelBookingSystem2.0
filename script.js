@@ -40,16 +40,16 @@ function loadDB() {
       db.users.push(doc.data());
     });
     
-    // Si la base en la nube está vacía la primera vez, inyectamos el administrador base
+    // Si la base en la nube está vacía la primera vez, subimos el admin base a Firebase
     if (db.users.length === 0) {
-      db.users = [
-        { id: 1, name: 'Admin', lastName: 'System', age: 30, phone: '5550001', nationality: 'MX', email: 'admin@hotel.com', password: 'admin123', role: 'Admin', active: true }
-      ];
-      // Aquí puedes llamar a tu función para sincronizar localmente si la usas: saveDB();
+      const defaultAdmin = { id: 1, name: 'Admin', lastName: 'System', age: 30, phone: '5550001', nationality: 'MX', email: 'admin@hotel.com', password: 'admin123', role: 'Admin', active: true };
+      db.users = [defaultAdmin];
+      fs.collection('users').doc('1').set(defaultAdmin);
     }
     
-    // Refrescar tabla de administración de forma automática
+    // Refrescar tablas de administración de forma automática
     if (typeof renderAdminUsers === 'function') renderAdminUsers();
+    if (typeof renderAdminPanel === 'function' && currentPage === 'admin-panel') renderAdminPanel();
   });
 
   // 2. Escuchar la colección de Reservaciones en tiempo real desde Firebase
@@ -60,18 +60,42 @@ function loadDB() {
     });
     
     if (typeof renderAdminBookings === 'function') renderAdminBookings();
+    if (typeof renderAdminPanel === 'function' && currentPage === 'admin-panel') renderAdminPanel();
   });
 
-  // 3. Habitaciones estables por defecto
-  db.rooms = [
-    { id: 1, name: 'Presidential Suite', desc: 'Luxury suite with panoramic view, private jacuzzi and 24-hour personal butler service.', price: 450, img: 'room1', amenities: ['Jacuzzi','Panoramic view','Butler','Wi-Fi 1Gbps'], active: true },
-    { id: 2, name: 'Deluxe Double Room', desc: 'Spacious room with two queen-size beds, private balcony, minibar and room service.', price: 220, img: 'room2', amenities: ['2 Queen beds','Balcony','Minibar','Room service'], active: true }
-  ];
+  // 3. Habitaciones desde Firebase (con fallback a defaults si vacío)
+  fs.collection("rooms").onSnapshot((snapshot) => {
+    if (snapshot.empty) {
+      const defaultRooms = [
+        { id: 1, name: 'Presidential Suite', desc: 'Luxury suite with panoramic view, private jacuzzi and 24-hour personal butler service.', price: 450, img: 'room1', amenities: ['Jacuzzi','Panoramic view','Butler','Wi-Fi 1Gbps'], active: true },
+        { id: 2, name: 'Deluxe Double Room', desc: 'Spacious room with two queen-size beds, private balcony, minibar and room service.', price: 220, img: 'room2', amenities: ['2 Queen beds','Balcony','Minibar','Room service'], active: true }
+      ];
+      db.rooms = defaultRooms;
+      defaultRooms.forEach(r => fs.collection("rooms").doc(r.id.toString()).set(r));
+    } else {
+      db.rooms = [];
+      snapshot.forEach(doc => db.rooms.push(doc.data()));
+    }
+    if (typeof renderAdminRooms === 'function') renderAdminRooms();
+    if (typeof renderRooms === 'function' && currentPage === 'rooms') renderRooms();
+    if (typeof renderHome === 'function' && currentPage === 'home') renderHome();
+    if (typeof renderAdminPanel === 'function' && currentPage === 'admin-panel') renderAdminPanel();
+  });
 
   // Mantener la sesión iniciada en el navegador actual
   const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
   db.currentUser = session.currentUser || null;
   db.pending = session.pending || null;
+}
+
+function persistAndRefresh() {
+  saveDB();
+  if (currentPage === 'admin-panel') renderAdminPanel();
+}
+
+function getRoomName(roomId) {
+  const r = db.rooms.find(r => r.id === roomId);
+  return r ? r.name : '—';
 }
 
 function saveDB() {
@@ -91,7 +115,11 @@ function saveDB() {
 
   db.bookings.forEach(booking => {
     fs.collection("bookings").doc(booking.id.toString()).set(booking);
+  
+  db.rooms.forEach(room => {
+    fs.collection("rooms").doc(room.id.toString()).set(room);
   });
+});
 }
 // ── UTILS ─────────────────────────────────────────────────────
 const $  = id  => document.getElementById(id);
@@ -558,8 +586,7 @@ function renderAdminRooms() {
     <tr>
       <td><img class="thumb" src="${IMG(r.img)}" alt="${r.name}" onerror="this.style.background='#e8e0d0'"/></td>
       <td><strong>${r.name}</strong></td>
-      // Línea 965 protegida en tu script.js:
-<td style="max-width:200px;color:var(--stone-500);font-size:.82rem;">${(r.desc || '').slice(0,70)}…</td>
+      <td style="max-width:200px;color:var(--stone-500);font-size:.82rem;">${(r.desc || '').slice(0,70)}…</td>
       <td>${fmtMoney(r.price)}</td>
       <td>${roomStatusBadge(r.id)}</td>
       <td>${(r.amenities||[]).slice(0,2).map(a=>`<span class="badge badge-user">${a}</span>`).join(' ')}</td>
@@ -678,68 +705,93 @@ function renderAdminUsers() {
     const isSelf = db.currentUser && db.currentUser.id === u.id;
     return `
       <tr>
-        <td>${u.id}</td>
-        <td><strong>${u.name} ${u.lastName}</strong> ${isSelf ? '<span class="badge badge-user">(Tú)</span>':''}</td>
+        <td><strong>${u.name} ${u.lastName}</strong> ${isSelf ? '<span class="badge badge-user">(You)</span>':''}</td>
         <td>${u.email}</td>
+        <td>${u.phone||'—'}</td>
+        <td>${u.nationality||'—'}</td>
         <td>${u.role}</td>
-        <td><span class="status-dot ${u.active?'dot-active':'dot-inactive'}"></span> ${u.active?'Active':'Inactive'}</td>
-        <td>
+        <td><span class="badge ${u.active!==false?'badge-yes':'badge-no'}">${u.active!==false?'Active':'Inactive'}</span></td>
+        <td style="white-space:nowrap;">
           <button class="btn btn-gold btn-sm" onclick="editUser(${u.id})">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="openDeleteModal('user',${u.id})" ${isSelf?'disabled style="opacity:0.5; cursor:not-allowed;"':''}>Delete</button>
+          <button class="btn btn-sm ${u.active!==false?'btn-neutral':'btn-success'}" onclick="toggleUserStatus(${u.id})" ${isSelf?'disabled style="opacity:0.5;cursor:not-allowed;"':''}>
+            ${u.active!==false?'Deactivate':'Activate'}
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal('user',${u.id})" ${isSelf?'disabled style="opacity:0.5;cursor:not-allowed;"':''}>Delete</button>
         </td>
       </tr>
     `;
-  }).join('');
+  }).join('') || '<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--stone-400)">No users found.</td></tr>';
 }
 
-// Buscar usuarios en el panel de admin
-const adminSearchInput = document.getElementById('adminSearchInput');
-if (adminSearchInput) {
-    adminSearchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const loggedInUser = db.currentUser; // Sincronizado con tu sistema de sesión nativo
+function openUserModal(id) {
+  const modal = $('modal-user');
+  if (!modal) return;
+  $('user-modal-title').textContent = id ? 'Edit User' : 'New User';
+  $('user-modal-id').value = id || '';
+  if (id) {
+    const u = db.users.find(u => u.id === id);
+    if (!u) return;
+    setVal('user-name-input',        u.name);
+    setVal('user-lastname-input',    u.lastName);
+    setVal('user-email-input',       u.email);
+    setVal('user-phone-input',       u.phone || '');
+    setVal('user-nationality-input', u.nationality || '');
+    setVal('user-age-input',         u.age || '');
+    setVal('user-role-select',       u.role);
+    setVal('user-pass-input',        '');
+    $('user-active-check').checked = u.active !== false;
+  } else {
+    ['user-name-input','user-lastname-input','user-email-input','user-phone-input',
+     'user-nationality-input','user-age-input','user-pass-input'].forEach(x => setVal(x, ''));
+    setVal('user-role-select', 'User');
+    $('user-active-check').checked = true;
+  }
+  modal.classList.add('open');
+}
+function editUser(id) { openUserModal(id); }
 
-        const filteredUsers = db.users.filter(user =>
-            user.name.toLowerCase().includes(searchTerm) ||
-            user.email.toLowerCase().includes(searchTerm) ||
-            user.role.toLowerCase().includes(searchTerm)
-        );
-
-        const tableBody = document.getElementById('adminUsersTableBody');
-        if (tableBody) {
-            tableBody.innerHTML = '';
-
-            filteredUsers.forEach(user => {
-                const tr = document.createElement('tr');
-                const isSelf = loggedInUser && user.email === loggedInUser.email;
-
-                tr.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${user.name} ${isSelf ? '<span style="color: #007bff; font-weight: bold;">(Tú)</span>' : ''}</td>
-                    <td>${user.email}</td>
-                    <td>${user.role}</td>
-                    <td>
-                        <span class="status-badge ${user.active ? 'status-active' : 'status-inactive'}">
-                            ${user.active ? 'Activo' : 'Inactivo'}
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn-action btn-edit" onclick="openEditUserModal(${user.id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-action btn-toggle" onclick="toggleUserStatus(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;" title="No puedes inactivar tu propia cuenta"' : ''}>
-                            <i class="fas ${user.active ? 'fa-user-slash' : 'fa-user-check'}"></i>
-                        </button>
-                        <button class="btn-action btn-delete" onclick="deleteUser(${user.id})" ${isSelf ? 'disabled style="opacity: 0.5; cursor: not-allowed;" title="No puedes eliminar tu propia cuenta"' : ''}>
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        }
+function saveUser() {
+  const id       = getVal('user-modal-id');
+  const name     = getVal('user-name-input');
+  const lastName = getVal('user-lastname-input');
+  const email    = getVal('user-email-input');
+  const pass     = getVal('user-pass-input');
+  const role     = getVal('user-role-select') || 'User';
+  const active   = $('user-active-check').checked;
+  if (!name || !lastName || !email) { alert('Name, last name and email are required.'); return; }
+  if (!id && !pass) { alert('Password is required for new users.'); return; }
+  if (!id && db.users.find(u => u.email === email)) { alert('This email is already registered.'); return; }
+  if (id) {
+    const u = db.users.find(u => u.id === +id);
+    if (u) {
+      Object.assign(u, { name, lastName, email,
+        phone: getVal('user-phone-input'),
+        nationality: getVal('user-nationality-input'),
+        age: +getVal('user-age-input') || u.age,
+        role, active
+      });
+      if (pass) u.password = pass;
+    }
+  } else {
+    db.users.push({
+      id: Date.now(), name, lastName, email, password: pass, role, active,
+      phone: getVal('user-phone-input'),
+      nationality: getVal('user-nationality-input'),
+      age: +getVal('user-age-input') || 0
     });
+  }
+  persistAndRefresh(); closeModal('modal-user'); renderAdminUsers();
 }
+
+function toggleUserStatus(id) {
+  const u = db.users.find(u => u.id === id);
+  if (!u) return;
+  if (db.currentUser && db.currentUser.id === id) { alert("You can't deactivate your own account."); return; }
+  u.active = !u.active;
+  persistAndRefresh(); renderAdminUsers();
+}
+
+function deleteUser(id) { openDeleteModal('user', id); }
 
 // ── SETTINGS ──────────────────────────────────────────────────
 function renderSettings() { loadSettingsValues(); openSettingsTab('general'); }
@@ -836,9 +888,9 @@ function openDeleteModal(type, id) {
   const msgs = { room:'Delete this room? Associated bookings will also be deleted.', booking:'Delete this booking?', user:'Delete this user?' };
   $('del-msg').textContent = msgs[type]||'Confirm deletion?';
   _deleteFn = () => {
-    if (type==='room')    { db.rooms=db.rooms.filter(r=>r.id!==id); db.bookings=db.bookings.filter(r=>r.roomId!==id); persistAndRefresh(); closeModal('modal-del'); renderAdminRooms(); }
-    if (type==='booking') { db.bookings=db.bookings.filter(r=>r.id!==id); persistAndRefresh(); closeModal('modal-del'); renderAdminBookings(); }
-    if (type==='user')    { db.users=db.users.filter(u=>u.id!==id); db.bookings=db.bookings.filter(r=>r.userId!==id); persistAndRefresh(); closeModal('modal-del'); renderAdminUsers(); }
+    if (type==='room')    { db.rooms=db.rooms.filter(r=>r.id!==id); db.bookings=db.bookings.filter(r=>r.roomId!==id); fs.collection('rooms').doc(id.toString()).delete(); persistAndRefresh(); closeModal('modal-del'); renderAdminRooms(); }
+    if (type==='booking') { db.bookings=db.bookings.filter(r=>r.id!==id); fs.collection('bookings').doc(id.toString()).delete(); persistAndRefresh(); closeModal('modal-del'); renderAdminBookings(); }
+    if (type==='user')    { db.users=db.users.filter(u=>u.id!==id); db.bookings=db.bookings.filter(r=>r.userId!==id); fs.collection('users').doc(id.toString()).delete(); persistAndRefresh(); closeModal('modal-del'); renderAdminUsers(); }
   };
   $('modal-del').classList.add('open');
 }
