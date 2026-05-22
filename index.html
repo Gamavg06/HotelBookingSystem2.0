@@ -484,7 +484,7 @@
     </div>
     <div class="table-shell">
       <table>
-        <thead><tr><th>Image</th><th>Name</th><th>Description</th><th>Price/night</th><th>Amenities</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Image</th><th>Name</th><th>Description</th><th>Price/night</th><th>Status</th><th>Amenities</th><th>Actions</th></tr></thead>
         <tbody id="admin-rooms-tbody"></tbody>
       </table>
     </div>
@@ -526,12 +526,13 @@
         <h2>Users</h2>
       </div>
       <div class="page-header-actions">
+        <button class="btn btn-success" onclick="openUserModal()">+ New user</button>
         <button class="btn btn-gold-outline" onclick="doLogout()">⏻ Log out</button>
       </div>
     </div>
     <div class="table-shell">
       <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Nationality</th><th>Role</th><th>Action</th></tr></thead>
+        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Nationality</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="admin-users-tbody"></tbody>
       </table>
     </div>
@@ -765,6 +766,67 @@
 <!-- ══════════════════════════════════════════════════════════
      MODAL — ROOM
 ═══════════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — USER (admin)
+═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal-box">
+    <h3 id="user-modal-title">New User</h3>
+    <input type="hidden" id="user-modal-id"/>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label class="form-label form-label-dark">Name</label>
+        <input class="form-input form-input-dark" id="user-name-input" placeholder="First name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label form-label-dark">Last name</label>
+        <input class="form-input form-input-dark" id="user-lastname-input" placeholder="Last name"/>
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label class="form-label form-label-dark">Email</label>
+        <input class="form-input form-input-dark" id="user-email-input" type="email" placeholder="email@example.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label form-label-dark">Password <small class="text-normal">(leave blank to keep)</small></label>
+        <input class="form-input form-input-dark" id="user-pass-input" type="password" placeholder="••••••••"/>
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label class="form-label form-label-dark">Phone</label>
+        <input class="form-input form-input-dark" id="user-phone-input" placeholder="5550001234"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label form-label-dark">Age</label>
+        <input class="form-input form-input-dark" id="user-age-input" type="number" placeholder="25"/>
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label class="form-label form-label-dark">Nationality</label>
+        <input class="form-input form-input-dark" id="user-nationality-input" placeholder="MX"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label form-label-dark">Role</label>
+        <select class="form-input form-input-dark" id="user-role-select" aria-label="Role">
+          <option value="User">User</option>
+          <option value="Admin">Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="checkbox-wrapper">
+      <input type="checkbox" id="user-active-check" checked/>
+      <label class="form-label form-label-dark" for="user-active-check">Active account</label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-neutral" onclick="closeModal('modal-user')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveUser()">Save user</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-room">
   <div class="modal-box">
     <h3 id="rm-title">New Room</h3>
@@ -908,4 +970,4 @@
     
 <script src="script.js"></script>
 </body>
-</html> 
+</html>
