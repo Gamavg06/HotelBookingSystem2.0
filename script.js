@@ -1032,12 +1032,11 @@ window.addEventListener('storage', (event) => {
 });
 // ── FUNCIÓN DE RESPALDO PARA EVITAR EL ERROR DE NAVEGACIÓN ──
 function syncCurrentUser() {
-  // Sincroniza el usuario actual con la sesión del navegador
   if (db && db.currentUser) {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify({
       currentUser: db.currentUser,
       pending: db.pending
     }));
   }
-  console.log("Usuario actual sincronizado correctamente.");
+  console.log("Usuario sincronizado.");
 }
