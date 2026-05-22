@@ -12,15 +12,15 @@ const firebaseConfig = {
   measurementId: "G-N24Y9G1L74"
 };
 
- // Borra las dos líneas anteriores y pon estas:
+// Inicialización correcta de Firebase
 firebase.initializeApp(firebaseConfig);
-const fs = firebase.firestore(); // Con esto dejas lista tu base de datos "fs"
+const fs = firebase.firestore(); 
 
 const IMG = key => `wwwroot/images/${key}.png`;
 const DB_KEY      = 'hotelDB5';
 const SESSION_KEY = 'hotelSession5';
 
-// ── DB ────────────────────────────────────────────────────────
+// ── DB LOCAL ──────────────────────────────────────────────────
 let db = {
   users: [], rooms: [], bookings: [],
   currentUser: null, pending: null,
@@ -45,7 +45,7 @@ function loadDB() {
       db.users = [
         { id: 1, name: 'Admin', lastName: 'System', age: 30, phone: '5550001', nationality: 'MX', email: 'admin@hotel.com', password: 'admin123', role: 'Admin', active: true }
       ];
-      saveDB();
+      // Aquí puedes llamar a tu función para sincronizar localmente si la usas: saveDB();
     }
     
     // Refrescar tabla de administración de forma automática
@@ -61,6 +61,7 @@ function loadDB() {
     
     if (typeof renderAdminBookings === 'function') renderAdminBookings();
   });
+}
 
   // 3. Habitaciones estables por defecto
   db.rooms = [
