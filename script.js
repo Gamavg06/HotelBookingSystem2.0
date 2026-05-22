@@ -2,7 +2,6 @@
 // ║  Hotel Booking — script.js                                ║
 // ║  + SGNIA Chatbot + Card formatting                        ║
 // ╚═══════════════════════════════════════════════════════════╝
- const firebaseConfig = {
     const firebaseConfig = {
   apiKey: "AIzaSyB73giypNiO2q2M6lz_W6vf4WkVZkA2o9c",
   authDomain: "hotelbookingsystem-4da28.firebaseapp.com",
