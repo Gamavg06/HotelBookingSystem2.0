@@ -115,11 +115,10 @@ function saveDB() {
 
   db.bookings.forEach(booking => {
     fs.collection("bookings").doc(booking.id.toString()).set(booking);
-  
+  });
   db.rooms.forEach(room => {
     fs.collection("rooms").doc(room.id.toString()).set(room);
   });
-});
 }
 // ── UTILS ─────────────────────────────────────────────────────
 const $  = id  => document.getElementById(id);
