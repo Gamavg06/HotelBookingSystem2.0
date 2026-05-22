@@ -2,7 +2,7 @@
 // ║  Hotel Booking — script.js                                ║
 // ║  + SGNIA Chatbot + Card formatting                        ║
 // ╚═══════════════════════════════════════════════════════════╝
-    const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyB73giypNiO2q2M6lz_W6vf4WkVZkA2o9c",
   authDomain: "hotelbookingsystem-4da28.firebaseapp.com",
   projectId: "hotelbookingsystem-4da28",
@@ -10,7 +10,7 @@
   messagingSenderId: "286277173585",
   appId: "1:286277173585:web:2e58261b7562b6f8bc5370",
   measurementId: "G-N24Y9G1L74"
-  };
+};
 
  // Borra las dos líneas anteriores y pon estas:
 firebase.initializeApp(firebaseConfig);
